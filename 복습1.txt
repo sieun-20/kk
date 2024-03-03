@@ -1,0 +1,69 @@
+어제 배운 플라스크 서버 구조 대로 가셔야 합니다. 
+
+project/
+│
+├── app.py
+│
+└── templates/
+    └── index.html
+
+mysql -u root
+
+파이썬 코드 
+
+import pymysql
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+def get_table_data():
+    # MySQL 연결 설정
+    connection = pymysql.connect(host='localhost', user='root', password='1234', db='testdb', charset='utf8')
+    try:
+        with connection.cursor() as cursor:
+            # 테이블 데이터 조회
+            cursor.execute("SELECT * FROM user")
+            table_data = cursor.fetchall()
+            return table_data
+    finally:
+        connection.close()
+
+@app.route('/')
+def index():
+    # 데이터베이스에서 테이블 데이터 가져오기
+    table_data = get_table_data()
+    # 템플릿 렌더링 및 테이블 데이터 전달
+    return render_template('index.html', table_data=table_data)
+
+if __name__ == '__main__':
+    app.run(host="localhost", port="1709")
+
+
+그다음 html 코드
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database Table</title>
+</head>
+<body>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_data %}
+            <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
